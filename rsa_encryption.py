@@ -1,13 +1,15 @@
 import random
 
+
 """Calculates Greatest Common Denominator"""
-def gcd(a, b):
+def find_gcd(a, b):
     while b != 0:
         a, b = b, a % b
     return a
 
+
 """Returns the multiplicative inverse of two numbers e and z"""
-def multiplicative_inverse(e, z):
+def mult_inverse(e, z):
     d = 0
     x1 = 0
     x2 = 1
@@ -19,10 +21,8 @@ def multiplicative_inverse(e, z):
         temp2 = temp_z - temp1 * e
         temp_z = e
         e = temp2
-
         x = x2 - temp1 * x1
         y = d - temp1 * y1
-
         x2 = x1
         x1 = x
         d = y1
@@ -30,6 +30,7 @@ def multiplicative_inverse(e, z):
 
     if temp_z == 1:
         return d + z
+
 
 """Checks if the argument num is a prime number"""
 def is_prime(num):
@@ -42,28 +43,23 @@ def is_prime(num):
             return False
     return True
 
+
 """Generates a key pair from the two prime numbers provided"""
 def generate_keypair(p, q):
     n = p * q
-
-    # z is the totient of n
     z = (p - 1) * (q - 1)
-
-    # Choose an integer e such that e and z(n) are coprime
     e = random.randrange(1, z)
 
-    # Use Euclid's Algorithm to verify that e and z(n) are coprime
-    g = gcd(e, z)
+    # Check if the numbers are coprime
+    g = find_gcd(e, z)
     while g != 1:
         e = random.randrange(1, z)
-        g = gcd(e, z)
+        g = find_gcd(e, z)
 
-    # Use Extended Euclid's Algorithm to generate the private key
-    d = multiplicative_inverse(e, z)
-
-    # Return public and private keypair
-    # Public key is (e, n) and private key is (d, n)
+    d = mult_inverse(e, z)
+    # Public key (e, n) and private key (d, n)
     return ((e, n), (d, n))
+
 
 """RSA Encryption"""
 def encrypt(pk, plaintext):
@@ -71,8 +67,9 @@ def encrypt(pk, plaintext):
     key, n = pk
     # Apply RSA algorithm to each character's ASCII value of the plaintext
     cipher = [(ord(char) ** key) % n for char in plaintext]
-    # Return the array of bytes
+    # Return the array of bytes (ciphertext)
     return cipher
+
 
 """RSA Decryption"""
 def decrypt(pk, ciphertext):
@@ -120,31 +117,32 @@ if __name__ == '__main__':
             print "DECRYPTED:"
             print decrypt(public, encrypted_msg)
         elif selection == '2':
-            print "Encrypt"
+            p = int(raw_input("Enter first prime: "))
+            if not is_prime(p):
+                while not is_prime(p):
+                    print "", p, " is not prime"
+                    p = int(raw_input("Enter first prime: "))
+            q = int(raw_input("Enter second prime: "))
+            if not is_prime(q):
+                while not is_prime(q):
+                    print "", q, " is not prime"
+                    q = int(raw_input("Enter second prime: "))
+            print "Generating key pairs"
+            public, private = generate_keypair(p, q)
+            print "Public key: ", public, " Private key: ", private
+            message = raw_input("Enter message to be encrypted: ")
+            encrypted_msg = encrypt(private, message)
+            print "ENCRYPTED: "
+            print ''.join(map(lambda x: str(x), encrypted_msg))
         elif selection == '3':
-            print "Decrypt"
+            ciphertxt = raw_input("Enter message to be decrypted: ")
+            print "Enter the public keys: "
+            public = map(int, input())
+            public = tuple(public)
+            print "Decrypting with public key ", public
+            print "DECRYPTED:"
+            print decrypt(public, ciphertxt)
         elif selection == '4':
             break
         else:
             print "Unknown Option Selected!"
-
-    # p = int(raw_input("Enter first prime: "))
-    # if not is_prime(p):
-    #     while not is_prime(p):
-    #         print "", p, " is not prime"
-    #         p = int(raw_input("Enter first prime: "))
-    # q = int(raw_input("Enter second prime: "))
-    # if not is_prime(q):
-    #     while not is_prime(q):
-    #         print "", q, " is not prime"
-    #         q = int(raw_input("Enter second prime: "))
-    # print "Generating key pairs"
-    # public, private = generate_keypair(p, q)
-    # print "Public key: ", public, " Private key: ", private
-    # message = raw_input("Enter message to be encrypted: ")
-    # encrypted_msg = encrypt(private, message)
-    # print "ENCRYPTED: "
-    # print ''.join(map(lambda x: str(x), encrypted_msg))
-    # print "Decrypting with public key ", public
-    # print "DECRYPTED:"
-    # print decrypt(public, encrypted_msg)
